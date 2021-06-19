@@ -31,6 +31,7 @@ pkg_deps=(
 )
 
 pkg_build_deps=(
+  core/file
   core/coreutils
   core/diffutils
   core/gcc
@@ -42,6 +43,11 @@ pkg_build_deps=(
 do_prepare() {
   sed -i.bak 's/#zlib/zlib/' Modules/Setup.dist
   sed -i -re "/(SSL=|_ssl|-DUSE_SSL|-lssl).*/ s|^#||" Modules/Setup.dist
+
+  if [[ ! -r /usr/bin/file ]]; then
+    ln -sv "$(pkg_path_for file)/bin/file" /usr/bin/file
+    _clean_file=true
+  fi
 }
 
 do_build() {
@@ -83,4 +89,10 @@ do_install() {
 # Disable binary manylinux1(CentOS 5) wheel support
 manylinux1_compatible = False
 EOF
+}
+
+do_end() {
+  if [[ -n "$_clean_file" ]]; then
+    rm -fv /usr/bin/file
+  fi
 }
