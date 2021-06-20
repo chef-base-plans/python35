@@ -11,6 +11,16 @@ pkg_dirname="${pkg_distname}-${pkg_version}"
 pkg_source="https://www.python.org/ftp/python/${pkg_version}/${pkg_dirname}.tgz"
 pkg_shasum="67a1d4fc6e4540d6a092cadc488e533afa961b3c9becc74dc3d6b55cb56e0cc1"
 
+# Interesting situation here where 3.5.9 will compile fine and most tests
+# will pass when run with `--enable-optimizaitons`, however some included
+# self-signed certs used in the tests have expired. We circumvent this by
+# replacing the pems in the Lib/test directory with those of a newer
+# distribution
+pkg_3_9_5_source="${pkg_source//$pkg_version/3.9.5}"
+pkg_3_9_5_dirname="${pkg_dirname//$pkg_version/3.9.5}"
+pkg_3_9_5_filename="$(basename "$pkg_3_9_5_source")"
+pkg_3_9_5_shasum="e0fbd5b6e1ee242524430dee3c91baf4cbbaba4a72dd1674b90fda87b713c7ab"
+
 pkg_bin_dirs=(bin)
 pkg_lib_dirs=(lib)
 pkg_include_dirs=(include)
@@ -44,6 +54,22 @@ do_setup_environment() {
   export LDFLAGS="$LDFLAGS -lgcc_s"
 }
 
+do_download() {
+  do_default_download
+
+  download_file "$pkg_3_9_5_source" "$pkg_3_9_5_filename" "$pkg_3_9_5_shasum"
+}
+
+do_verify() {
+  do_default_verify
+  verify_file "$pkg_3_9_5_filename" "$pkg_3_9_5_shasum"
+}
+
+do_unpack() {
+  do_default_unpack
+  unpack_file "$pkg_3_9_5_filename"
+}
+
 do_prepare() {
   sed -i.bak 's/#zlib/zlib/' Modules/Setup.dist
   sed -i -re "/(SSL=|_ssl|-DUSE_SSL|-lssl).*/ s|^#||" Modules/Setup.dist
@@ -55,6 +81,9 @@ do_prepare() {
 }
 
 do_build() {
+  # Copy the pems from 3.9.5 to Lib/test for testing
+  cp ${HAB_CACHE_SRC_PATH}/${pkg_3_9_5_dirname}/Lib/test/*.pem Lib/test
+
   ./configure --prefix="$pkg_prefix" \
               --enable-loadable-sqlite-extensions \
               --enable-shared \
