@@ -1,6 +1,6 @@
 pkg_name=python35
 pkg_distname=Python
-pkg_version=3.5.9
+pkg_version=3.5.10
 pkg_origin=core
 pkg_maintainer="The Habitat Maintainers <humans@habitat.sh>"
 pkg_license=('Python-2.0')
@@ -9,7 +9,7 @@ pkg_description="Python is a programming language that lets you work quickly \
 pkg_upstream_url="https://www.python.org"
 pkg_dirname="${pkg_distname}-${pkg_version}"
 pkg_source="https://www.python.org/ftp/python/${pkg_version}/${pkg_dirname}.tgz"
-pkg_shasum="67a1d4fc6e4540d6a092cadc488e533afa961b3c9becc74dc3d6b55cb56e0cc1"
+pkg_shasum="3496a0daf51913718a6f10e3eda51fa43634cb6151cb096f312d48bdbeff7d3a"
 
 # Interesting situation here where 3.5.9 will compile fine and most tests
 # will pass when run with `--enable-optimizaitons`, however some included
